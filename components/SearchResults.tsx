@@ -1,4 +1,6 @@
-import { FiExternalLink, FiStar } from 'react-icons/fi';
+import { useState, useEffect, memo } from 'react';
+import Image from 'next/image';
+import { Star, GitFork, ExternalLink } from 'lucide-react';
 
 interface Repository {
   id: number;
@@ -18,69 +20,107 @@ interface SearchResultsProps {
   isLoading: boolean;
 }
 
-export default function SearchResults({ results, isLoading }: SearchResultsProps) {
+const SearchResults = memo(function SearchResults({ results, isLoading }: SearchResultsProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   if (isLoading) {
     return (
-      <div className="mt-8 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600 dark:text-gray-400">Searching repositories...</p>
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="animate-pulse">
+            <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          </div>
+        ))}
       </div>
     );
   }
 
-  if (!results.length) {
+  if (!mounted) {
     return (
-      <div className="mt-8 text-center text-gray-600 dark:text-gray-400">
-        No repositories found. Try a different search term.
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="animate-pulse">
+            <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="mt-8 space-y-6">
+    <div className="space-y-4">
       {results.map((repo) => (
         <article
           key={repo.id}
-          className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow duration-200"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <img
-              src={repo.owner.avatar_url}
-              alt={`${repo.owner.login}'s avatar`}
-              className="w-8 h-8 rounded-full"
-            />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {repo.name}
-            </h2>
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+                <Image
+                  src={repo.owner.avatar_url}
+                  alt={`${repo.owner.login}'s avatar`}
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                  loading="lazy"
+                  quality={75}
+                  onError={(e) => {
+                    // Fallback to a default avatar if the image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(repo.owner.login)}&background=random`;
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                  <a
+                    href={repo.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                  >
+                    {repo.owner.login}/{repo.name}
+                  </a>
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <span className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <Star className="w-4 h-4 mr-1" />
+                    {repo.stargazers_count.toLocaleString()}
+                  </span>
+                  <a
+                    href={repo.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                {repo.description || 'No description available'}
+              </p>
+              <div className="mt-2 flex items-center space-x-4">
+                {repo.language && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                    {repo.language}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {repo.description || 'No description available'}
-          </p>
-          <div className="flex flex-wrap gap-2 mb-3">
-            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm text-gray-700 dark:text-gray-300">
-              {repo.owner.login}
-            </span>
-            {repo.language && (
-              <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm text-gray-700 dark:text-gray-300">
-                {repo.language}
-              </span>
-            )}
-            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm text-gray-700 dark:text-gray-300 flex items-center">
-              <FiStar className="mr-1" />
-              {repo.stargazers_count.toLocaleString()}
-            </span>
-          </div>
-          <a
-            href={repo.html_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-blue-600 hover:text-blue-700"
-          >
-            <FiExternalLink className="mr-1" />
-            View Repository
-          </a>
         </article>
       ))}
     </div>
   );
-} 
+});
+
+export default SearchResults; 
