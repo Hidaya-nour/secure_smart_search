@@ -43,7 +43,7 @@ export default function SearchBar({ onSearch, isLoading = false }: SearchBarProp
             setError(null);
           }}
           placeholder="Search GitHub repositories..."
-          className={`w-full px-4 py-3 pl-12 text-gray-900 dark:text-white bg-white dark:bg-gray-800 border ${
+          className={`w-full px-4 py-2 pl-12 text-gray-900 dark:text-white bg-white dark:bg-gray-800 border ${
             error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
           } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none transition-colors duration-200`}
           aria-label="Search GitHub repositories"
@@ -61,7 +61,7 @@ export default function SearchBar({ onSearch, isLoading = false }: SearchBarProp
         />
         <button
           type="submit"
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors duration-200"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors duration-200"
           disabled={isLoading}
           aria-label={isLoading ? 'Searching...' : 'Search repositories'}
         >

@@ -50,7 +50,7 @@ export default function SearchFilters({ onFilterChange }: SearchFiltersProps) {
           id="language"
           value={language}
           onChange={handleLanguageChange}
-          className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+          className="w-full px-3 py-1.9 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
           aria-label="Filter by programming language"
         >
           <option value="">Any Language</option>
@@ -75,7 +75,7 @@ export default function SearchFilters({ onFilterChange }: SearchFiltersProps) {
           onChange={handleStarsChange}
           placeholder="e.g., 1000"
           min="0"
-          className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+          className="w-full px-3 py-1.9 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
           aria-label="Filter by minimum number of stars"
         />
       </div>

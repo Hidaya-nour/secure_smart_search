@@ -59,7 +59,12 @@ async function enhanceSearchQuery(query: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: "You are a search query enhancer. Your task is to improve GitHub repository search queries by adding relevant technical terms and filters. Keep the enhanced query concise and focused."
+          content: `You are a search query enhancer specialized in GitHub repository search. Your task is to:
+1. Add relevant technical terms and filters
+2. Include common frameworks and libraries related to the search
+3. Add quality indicators (stars, forks, etc.)
+4. Keep the enhanced query concise and focused
+5. Maintain the original intent of the search`
         },
         {
           role: "user",
@@ -75,6 +80,75 @@ async function enhanceSearchQuery(query: string): Promise<string> {
     console.error('OpenAI API error:', error);
     return query;
   }
+}
+
+// Add semantic analysis of repository descriptions
+async function analyzeRepository(repo: any): Promise<{
+  relevance: number;
+  categories: string[];
+  keyFeatures: string[];
+}> {
+  if (!openai) {
+    return {
+      relevance: 1,
+      categories: [],
+      keyFeatures: []
+    };
+  }
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: `Analyze this GitHub repository and provide:
+1. A relevance score (0-1) based on the description and metadata
+2. Main categories/tags that describe the repository
+3. Key features or technologies mentioned
+Keep the response concise and structured.`
+        },
+        {
+          role: "user",
+          content: `Repository: ${repo.name}
+Description: ${repo.description}
+Language: ${repo.language}
+Stars: ${repo.stargazers_count}
+Topics: ${repo.topics?.join(', ') || 'none'}`
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 150,
+    });
+
+    const analysis = JSON.parse(completion.choices[0].message.content || '{}');
+    return {
+      relevance: analysis.relevance || 1,
+      categories: analysis.categories || [],
+      keyFeatures: analysis.keyFeatures || []
+    };
+  } catch (error) {
+    console.error('OpenAI API error:', error);
+    return {
+      relevance: 1,
+      categories: [],
+      keyFeatures: []
+    };
+  }
+}
+
+interface Repository {
+  id: number;
+  name: string;
+  description: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+  stargazers_count: number;
+  html_url: string;
+  language: string;
+  topics?: string[];
 }
 
 export default async function handler(
@@ -136,12 +210,34 @@ export default async function handler(
       throw new Error('Invalid response format from GitHub API');
     }
 
+    // Enhance results with AI analysis
+    const enhancedResults = await Promise.all(
+      response.data.items.map(async (item: Repository) => {
+        const analysis = await analyzeRepository(item);
+        return {
+          ...item,
+          aiAnalysis: analysis
+        };
+      })
+    );
+
+    // Sort results by AI relevance score if available
+    enhancedResults.sort((a, b) => 
+      (b.aiAnalysis?.relevance || 0) - (a.aiAnalysis?.relevance || 0)
+    );
+
     return res.status(200).json({
-      items: response.data.items,
+      items: enhancedResults,
       total_count: response.data.total_count,
       originalQuery: validatedData.query,
       enhancedQuery: searchQuery,
-      isEnhanced: !!openai
+      isEnhanced: !!openai,
+      aiFeatures: {
+        queryEnhancement: !!openai,
+        semanticAnalysis: !!openai,
+        relevanceScoring: !!openai,
+        categorization: !!openai
+      }
     });
   } catch (error: any) {
     console.error('Search error:', error);

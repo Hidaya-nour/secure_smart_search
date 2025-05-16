@@ -85,10 +85,10 @@ export default function Home() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-4">
               <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full">
-                <GithubIcon className="h-8 w-8 text-gray-900 dark:text-white" />
+                <GithubIcon className="h-3 w-3 text-gray-900 dark:text-white" />
               </div>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">
               GitHub Repository Search
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
